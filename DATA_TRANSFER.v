@@ -35,10 +35,10 @@ module top_fsm(
 	output reg done_out
 );
 
-	parameter [3:0] IDLE 			= 4'b0001,
+	parameter [3:0] 		IDLE 			= 4'b0001,
 					READ_BYTE0 		= 4'b0010,
-					READ_BYTE1  	= 4'b0100,
-					WRITE_BYTE12	= 4'b1000;
+					READ_BYTE1  		= 4'b0100,
+					WRITE_BYTE12		= 4'b1000;
 					
 	reg [3:0] state;
 	reg [3:0] next_state;
@@ -257,14 +257,14 @@ top_fsm TOP(
 			if (expected != observed) begin
 			
 				error_count = error_count + 1;
-				//$display($time, " test_count = %d FAIL: expected data_out = %x, observed data_out = %x", test_count, expected, observed);
+				$display($time, " test_count = %d FAIL: expected data_out = %x, observed data_out = %x", test_count, expected, observed);
 			
 			end
 		
 			else begin
 			
 				success_count = success_count + 1;
-				//$display($time, " test_count = %d PASS: expected data_out = %x, observed data_out = %x", test_count, expected, observed);
+				$display($time, " test_count = %d PASS: expected data_out = %x, observed data_out = %x", test_count, expected, observed);
 			
 			end
 		
