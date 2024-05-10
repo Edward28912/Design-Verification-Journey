@@ -28,7 +28,7 @@ module top_fsm(
 	input [7:0] ram_in_data_wr,
 	input [4:0] ram_in_addr_wr,
 	//SIGNALS FOR THE OUTPUT RAM
-	input [15:0] ram_out_data_rd,
+	output [15:0] ram_out_data_rd,
 	input [3:0] ram_out_addr_rd,
 	//FSM CONTROL SIGNALS
 	input opmode_in,
