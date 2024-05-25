@@ -1,249 +1,210 @@
-`timescale 1ns / 1ps
-
-module FSM_chocolate_machine(
+module chocolate(
 	input clk,
-	input cents,
-	input euro,
-	input ack,
 	input reset_n,
+	input euro,
+	input cent,
+	input ack,
+	output [2:0] amount_out,
+	output [6:0] state_out,
 	output reg deliver
 );
 
-	localparam STATE_0 = 3'd0;
-	localparam STATE_0_5 = 3'd1;
-	localparam STATE_1 = 3'd2;
-	localparam STATE_1_5 = 3'd3;
-	localparam STATE_2 = 3'd4;
-	localparam STATE_2_5 = 3'd5;
-	localparam STATE_DELIVER = 3'd6;
+	parameter [6:0] IDLE		= 7'b0000001,
+			ACC_CENT	= 7'b0000010,
+			ACC_EURO	= 7'b0000100,
+			VAL_CENT	= 7'b0001000,
+			VAL_EURO	= 7'b0010000,
+			CHOCO      	 = 7'b0100000,
+			DELIVER    	 = 7'b1000000;
+					
+	reg [6:0] state, next_state;
 	
-	reg [2:0] state;
+	reg [2:0] amount;
 	
-	reg cents_d;
-	reg cents_p;
-	
-	reg euro_d;
-	reg euro_p;
-	
-	real amount; 
+	reg euro_d, cent_d;
+	wire euro_p, cent_p;
 	
 	always@(posedge clk) begin
 	
 		euro_d <= euro;
-		cents_d <= cents;
+		cent_d <= cent;
 	
 	end
 
-	assign cents_p = cents_d & ~cents;
-	assign euro_p = euro_d & ~euro;
+	assign euro_p = ~euro & euro_d;
+	assign cent_p = ~cent & cent_d;
+	
+	always@(posedge clk, negedge reset_n) begin
+	
+		if(!reset_n)
+			state <= IDLE;
+			
+		else
+			state <= next_state;
+	
+	end
+
+	assign state_out = state;
+
+	always@(*) begin
+	
+		case(state)
+		
+			IDLE: begin
+			
+				deliver = 0;
+			
+				if(euro_p) 
+					next_state = ACC_EURO;
+					
+				else if(cent_p)
+					next_state = ACC_CENT;
+					
+				else
+					next_state = state;
+			
+			end
+		
+			ACC_CENT: begin
+			
+				if(!cent_p)
+					next_state = VAL_CENT;
+					
+				else
+					next_state = state;
+			
+			end
+		
+			ACC_EURO: begin
+			
+				if(!euro_p)
+					next_state = VAL_EURO;
+					
+				else
+					next_state = state;
+			
+			end
+		
+			VAL_CENT: begin
+			
+				if(amount >= 5)
+					next_state = CHOCO;
+					
+				else
+					next_state = IDLE;
+			
+			end
+		
+			VAL_EURO: begin
+			
+				if(amount >= 5)
+					next_state = CHOCO;
+					
+				else
+					next_state = IDLE;
+			
+			end
+		
+			CHOCO: begin
+			
+				if(ack)
+					next_state = DELIVER;
+					
+				else
+					next_state = IDLE;
+			
+			end
+		
+			DELIVER: begin
+			
+				deliver = 1;
+				next_state = IDLE;
+			
+			end
+		
+			default: next_state = IDLE;
+		
+		endcase
+	
+		if(amount >=5 && state == IDLE) begin
+		
+			if(ack)
+				next_state = DELIVER;
+		
+		end
+	
+	end
 
 	always@(posedge clk, negedge reset_n) begin
 	
-		if (!reset_n) begin
-		
-			state <= STATE_0;
-			deliver <= 0;
+		if(!reset_n)
 			amount <= 0;
-		
-		end
-	
-		else begin
-		
-			case(state)
 			
-				STATE_0: begin
-
-          deliver <= 0;
-          
-					if(cents_p) begin
-					
-						state <= STATE_0_5;
-						amount <= amount + 0.5;
-					
-					end
-					
-					else if (euro_p) begin
-					
-						state <= STATE_1;
-						amount <= amount + 1;
-					
-					end
-					
-				end
+		else if(state == ACC_EURO && !euro_p)
+			amount <= amount + 2'd2;
 			
-				STATE_0_5: begin
-
-          deliver <= 0;
-          
-					if(cents_p) begin
-					
-						state <= STATE_1;
-						amount <= amount + 0.5;
-					
-					end
-				
-					else if(euro_p) begin
-					
-						state <= STATE_1_5;
-						amount <= amount + 1;
-					
-					end
-				
-				end
+		else if(state == ACC_CENT && !cent_p)
+			amount <= amount + 1'd1;
 			
-				STATE_1: begin
-				
-					if(cents_p) begin
-					
-						state <= STATE_1_5;
-						amount <= amount + 0.5;
-					
-					end
-				
-					else if (euro_p) begin
-					
-						state <= STATE_2;
-						amount <= amount + 1;
-					
-					end
-				
-				end
+		else if(state == DELIVER)
+			amount <= amount - 3'd5;
 			
-				STATE_1_5: begin
-				
-					if (cents_p) begin
-					
-						state <= STATE_2;
-						amount <= amount + 0.5;
-					
-					end
-				
-					else if (euro_p) begin
-					
-						state <= STATE_2_5;
-						amount <= amount + 1;
-						
-					end
-				
-				end
-			
-				STATE_2: begin
-				
-					if (cents_p) begin
-					
-						state <= STATE_2_5;
-						amount <= amount + 0.5;
-					
-					end
-				
-					else if (euro_p) begin
-					
-						state <= STATE_DELIVER;
-						amount <= amount + 1;
-					
-					end
-				
-				end
-			
-				STATE_2_5: begin
-				
-					if (cents_p) begin
-					
-						state <= STATE_DELIVER;
-						amount <= amount + 0.5;
-					
-					end
-				
-          else if (euro_p) begin
-					
-						state <= STATE_DELIVER;
-						amount <= amount + 1;
-					
-					end
-				
-				end
-			
-				STATE_DELIVER: begin
-				
-					if (ack) begin
-					
-						amount <= amount - 2.5;
-						deliver <= 1;
-						state <= (amount == 0.5) ? STATE_0_5 : STATE_0;
-					
-					end
-				
-					else
-						state <= STATE_DELIVER;
-				
-				end
-			
-				default: begin
-				
-					state <= STATE_0;
-					amount <= 0;
-					deliver <= 0;
-				
-				end
-			
-			endcase
-		
-		end
+		else
+			amount <= amount;
 	
 	end
 
+	assign amount_out = amount;
+
 endmodule
 
-module FSM_chocolate_machine_tb();
+`timescale 1ns / 1ps
+
+module chocolate_tb();
 
 	reg clk = 0;
-	reg cents;
-	reg euro;
 	reg reset_n;
+	reg euro;
+	reg cent;
 	reg ack;
 	wire deliver;
+	
+	wire [6:0] state;
+	wire [2:0] amount;
+	
+	chocolate DUT(
+		.clk		(clk),
+		.reset_n	(reset_n),
+		.euro		(euro),
+		.cent		(cent),
+		.ack		(ack),
+		.amount_out	(amount),
+		.state_out	(state),
+		.deliver	(deliver)
+	);
 
-  FSM_chocolate_machine DUT (
-	.clk(clk),
-	.cents(cents),
-	.euro(euro),
-	.reset_n(reset_n),
-	.ack(ack),
-	.deliver(deliver)
-);
-
-  always begin #10 clk = ~clk; end
-
+	always begin #5 clk = ~clk; end
+	
 	initial begin
 	
-		reset_n = 1;
+		reset_n = 0; euro = 0; cent = 0; ack = 0;
 		
-		@(negedge clk); reset_n = 0;
-
-    @(negedge clk); reset_n = 1;
-		
-		@(negedge clk); cents = 1;
-		
-		@(negedge clk);	cents = 0;
+		#20; reset_n = 1;
 		
 		@(negedge clk); euro = 1;
-		
-		@(negedge clk); euro  = 0;
-
-		@(negedge clk); euro = 1;
-
 		@(negedge clk); euro = 0;
-
-		@(negedge clk); cents = 1;
-
-		@(negedge clk); cents = 0;
-
-		@(negedge clk); ack = 1;
-
-		@(negedge clk); ack = 0;
 		
-		#150 $stop;
-
+		repeat(2) @(negedge clk); euro = 1;
+				  @(negedge clk); euro = 0;
+		
+		repeat(2) @(negedge clk); cent = 1;
+		          @(negedge clk); cent = 0;
+		
+		repeat(2) @(negedge clk); ack = 1;
+		repeat(2) @(negedge clk); ack = 0;
+		
+		#30; $stop;
+	
 	end
 
 endmodule
