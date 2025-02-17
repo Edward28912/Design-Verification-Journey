@@ -1,1 +1,2 @@
-This is a small list of Verilog modules + testbenches I have learnt so far.
+- Small list of modules I have designed using Verilog + their corresponding testbenches.
+- Small list of verification environments I have created using SystemVerilog.
