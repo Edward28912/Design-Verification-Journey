@@ -18,8 +18,6 @@ class ram_write_read_test extends uvm_test;
   endfunction
 
   virtual task run_phase(uvm_phase phase);
-    ram_write_sequence write_seq;
-    ram_read_sequence read_seq;
     ram_write_read_sequence write_read_seq;
     
     phase.raise_objection(this);
@@ -29,7 +27,7 @@ class ram_write_read_test extends uvm_test;
     #5; env.agent.vif.rstn = 1;
     `uvm_info(get_type_name(), "Starting write sequence", UVM_MEDIUM)
     
-    for(int i = 0; i < 100; i++) begin
+    for(int i = 0; i < 300; i++) begin
       write_read_seq = ram_write_read_sequence::type_id::create("write_read_seq", this);
       write_read_seq.is_random_b = 0;
       write_read_seq.we = 1;
@@ -38,7 +36,7 @@ class ram_write_read_test extends uvm_test;
       write_read_seq.start(env.agent.sequencer);
     end
     
-    for(int i = 0; i < 100; i++) begin
+    for(int i = 0; i < 1300; i++) begin
       write_read_seq = ram_write_read_sequence::type_id::create("write_read_seq", this);
       write_read_seq.is_random_b = 0;
       write_read_seq.we = 0;
@@ -46,25 +44,6 @@ class ram_write_read_test extends uvm_test;
       write_read_seq.start(env.agent.sequencer);
     end
     
-    /*for(int i = 0; i < 150; i++) begin
-      write_seq = ram_write_sequence::type_id::create("write_seq", this);
-      
-      write_seq.is_random_b = 0;
-      write_seq.addr = i;
-      write_seq.wdata = i % 255;
-      write_seq.we = 1;
-      write_seq.start(env.agent.sequencer);
-    end
-    `uvm_info(get_type_name(), "Starting read sequence", UVM_MEDIUM)
-    for(int i = 0; i < 150; i++) begin
-      read_seq = ram_read_sequence::type_id::create("read_seq", this);
-
-      read_seq.is_random_b = 0;
-      read_seq.addr = i;
-      read_seq.we = 0;
-      read_seq.start(env.agent.sequencer);    
-      end*/
-
     phase.drop_objection(this);
   endtask
 
