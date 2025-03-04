@@ -37,7 +37,7 @@ class ram_write_sequence extends uvm_sequence #(ram_seq_item);
 
     `uvm_send(seq_item)
 
-    `uvm_info(get_type_name()," WRITE sequence completed ", UVM_NONE)
+    //`uvm_info(get_type_name()," WRITE sequence completed ", UVM_NONE)
 		
 	endtask: body
 	
@@ -73,7 +73,7 @@ class ram_read_sequence extends uvm_sequence#(ram_seq_item);
 			
 			`uvm_send(seq_item)
 			
-			`uvm_info(get_type_name(), " READ sequence completed ", UVM_NONE)
+			//`uvm_info(get_type_name(), " READ sequence completed ", UVM_NONE)
 			
   endtask: body
 	
@@ -112,7 +112,7 @@ class ram_write_read_sequence extends uvm_sequence #(ram_seq_item);
 
     		`uvm_send(seq_item)
 
-    		`uvm_info(get_type_name()," WRITE sequence completed ", UVM_MEDIUM)
+    		//`uvm_info(get_type_name()," WRITE sequence completed ", UVM_MEDIUM)
 				
 			end
 		else begin
@@ -122,16 +122,16 @@ class ram_write_read_sequence extends uvm_sequence #(ram_seq_item);
 				});
 			end
 			else begin
-				seq_item.we 	= 0;
+				seq_item.we   = 0;
 				seq_item.addr = addr;
 				seq_item.rstn = 1;
 			end
 			
-				`uvm_info(get_type_name(), $sformatf(" Executing read sequence with parameters we=%0d, address=%0d, data=%0d", seq_item.we, seq_item.addr, seq_item.wdata), UVM_NONE)
+				`uvm_info(get_type_name(), $sformatf(" Executing read sequence with parameters we=%0d, address=%0d", seq_item.we, seq_item.addr), UVM_NONE)
 			
 				`uvm_send(seq_item)
 			
-				`uvm_info(get_type_name(), " READ sequence completed ", UVM_MEDIUM)
+				//`uvm_info(get_type_name(), " READ sequence completed ", UVM_MEDIUM)
 				
 		end
   endtask: body
