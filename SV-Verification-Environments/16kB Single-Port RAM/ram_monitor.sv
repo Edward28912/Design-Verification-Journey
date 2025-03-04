@@ -11,15 +11,12 @@ class ram_monitor extends uvm_monitor;
 
   covergroup ram_cov with function sample(bit [15:0] addr, bit [7:0] wdata, bit [7:0] rdata);
     option.per_instance = 1;
-   
     addr_cp: coverpoint addr {
       bins addr[50] = {[0:16383]};
     }
-
     wdata_cp: coverpoint wdata {
       bins wdata[10] = {[0:255]};
     }
-
     rdata_cp: coverpoint rdata {
       bins rdata[10] = {[0:255]};
     }
@@ -44,7 +41,7 @@ class ram_monitor extends uvm_monitor;
     `uvm_info(get_type_name(), " Starting the run() phase", UVM_MEDIUM)
     forever begin
       @(posedge vif.clk);
-      `uvm_info(get_type_name(), " Data access detected", UVM_NONE)
+      //`uvm_info(get_type_name(), " Data access detected", UVM_NONE)
       
       mon_item.we = vif.we;
       mon_item.addr = vif.addr;
